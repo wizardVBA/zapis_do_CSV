@@ -1,0 +1,287 @@
+Sub generuj_CSV() 'AZI
+
+    On Error GoTo zakoncz
+    Application.ScreenUpdating = False
+    
+    Set WS1 = ThisWorkbook.Worksheets("PLANET")
+    Set WS2 = ThisWorkbook.Worksheets("DOKUMENT")
+    Set WS3 = ThisWorkbook.Worksheets("CSV_INPUT")
+    Set WS4 = ThisWorkbook.Worksheets("MAPA")
+    
+    Call tworz_mape
+    
+    If WS2.Cells(17, 18).Value = "HURT" Then 'działanie dla opcji HURT
+
+        dł_ST = WS4.Range("G100000").End(xlUp).Row
+    
+        For s = 2 To dł_ST 'wybieranie stacji po koleji
+    
+            WS2.Cells(1, 2).Value = WS4.Cells(s, 7).Value 'v2
+    
+            nazwa_pliku = WS2.Cells(1, 2).Value & "_" & WS2.Cells(5, 3).Value & "_" & WS2.Cells(6, 3).Value
+    
+            Call czysc
+    
+            dł_WS1 = WS1.Range("B10000").End(xlUp).Row
+            dł_WS2 = WS2.Range("B10000").End(xlUp).Row
+            dł_WS3 = WS3.Range("A10000").End(xlUp).Row
+    
+            licznik = 1
+    
+            nr_wiersza = 10
+    
+            For i = 10 To dł_WS1
+    
+                If WS1.Cells(i, 2).Value = WS2.Cells(1, 2).Value Then
+    
+                    '--------------------- dane do zakładki DOKUMENT
+                    WS2.Cells(dł_WS2 + licznik, 1).Value = WS1.Cells(i, 3).Value 'LP
+                    WS2.Cells(dł_WS2 + licznik, 2).Value = WS1.Cells(i, 4).Value 'konto
+                    WS2.Cells(dł_WS2 + licznik, 3).Value = WS1.Cells(i, 5).Value 'kontrahent
+                    WS2.Cells(dł_WS2 + licznik, 4).Value = WS1.Cells(i, 6).Value 'MPK
+                    WS2.Cells(dł_WS2 + licznik, 5).Value = WS1.Cells(i, 7).Value 'kwota
+                    WS2.Cells(dł_WS2 + licznik, 7).Value = WS1.Cells(i, 9).Value 'opis
+                    WS2.Cells(dł_WS2 + licznik, 8).Value = WS1.Cells(i, 10).Value 'konto
+                    WS2.Cells(dł_WS2 + licznik, 9).Value = WS1.Cells(i, 11).Value 'kontrahent
+                    WS2.Cells(dł_WS2 + licznik, 10).Value = WS1.Cells(i, 12).Value 'MPK
+                    WS2.Cells(dł_WS2 + licznik, 11).Value = WS1.Cells(i, 13).Value 'kwota
+                    WS2.Cells(dł_WS2 + licznik, 13).Value = WS1.Cells(i, 15).Value 'opis
+                    '----------------------
+                    
+                    '--------------------- dane do zakładki CSV_INPUT
+                    WS3.Cells(1, 1).Value = WS2.Cells(5, 16).Value 'lokalizacja pliku
+                    WS3.Cells(1, 3).Value = nazwa_pliku
+                    WS3.Cells(dł_WS3 + licznik, 1).Value = WS2.Cells(dł_WS2 + licznik, 2).Value 'konto
+                    WS3.Cells(dł_WS3 + licznik, 2).Value = WS2.Cells(dł_WS2 + licznik, 3).Value 'kontrahent
+                    WS3.Cells(dł_WS3 + licznik, 3).Value = WS2.Cells(dł_WS2 + licznik, 4).Value 'MPK
+                    WS3.Cells(dł_WS3 + licznik, 4).Value = WS2.Cells(dł_WS2 + licznik, 5).Value 'kwota
+                    WS3.Cells(dł_WS3 + licznik, 6).Value = WS2.Cells(dł_WS2 + licznik, 7).Value 'opis
+                    WS3.Cells(dł_WS3 + licznik, 7).Value = WS2.Cells(dł_WS2 + licznik, 8).Value 'konto
+                    WS3.Cells(dł_WS3 + licznik, 8).Value = WS2.Cells(dł_WS2 + licznik, 9).Value 'kontrahent
+                    WS3.Cells(dł_WS3 + licznik, 9).Value = WS2.Cells(dł_WS2 + licznik, 10).Value 'MPK
+                    WS3.Cells(dł_WS3 + licznik, 10).Value = WS2.Cells(dł_WS2 + licznik, 11).Value 'kwota
+                    WS3.Cells(dł_WS3 + licznik, 12).Value = WS2.Cells(dł_WS2 + licznik, 13).Value 'opis
+                    WS3.Cells(dł_WS3 + licznik, 16).Value = nr_wiersza
+                    '---------------------
+                    
+                    licznik = licznik + 1
+    
+                    nr_wiersza = nr_wiersza + 1
+    
+                End If
+    
+            Next
+    
+            Call format
+
+            If WS2.Cells(18, 18).Value = "STANDARD" Then
+    
+                Call zapis
+    
+            End If
+
+            If WS2.Cells(18, 18).Value = "ROZDZIELNY" Then
+    
+                Call zapis2
+    
+            End If
+    
+            Sheets("DOKUMENT").Select
+    
+            Range("A1").Select
+    
+        Next
+       
+        MsgBox "Gotowe"
+    
+    End If
+    
+    If WS2.Cells(17, 18).Value = "PER ST" Then 'działanie dla opcji PER ST
+    
+        Call czysc
+
+        dł_WS1 = WS1.Range("B10000").End(xlUp).Row
+        dł_WS2 = WS2.Range("B10000").End(xlUp).Row
+        dł_WS3 = WS3.Range("A10000").End(xlUp).Row
+        dł_ST = WS2.Range("U10000").End(xlUp).Row
+
+        nazwa_pliku = WS2.Cells(1, 2).Value & "_" & WS2.Cells(5, 3).Value & "_" & WS2.Cells(6, 3).Value
+    
+            licznik = 1
+            nr_wiersza = 10
+    
+            For i = 10 To dł_WS1
+    
+                If WS1.Cells(i, 2).Value = WS2.Cells(1, 2).Value Then
+    
+                    '--------------------- dane do zakładki DOKUMENT
+                    WS2.Cells(dł_WS2 + licznik, 1).Value = WS1.Cells(i, 3).Value 'LP
+                    WS2.Cells(dł_WS2 + licznik, 2).Value = WS1.Cells(i, 4).Value 'konto
+                    WS2.Cells(dł_WS2 + licznik, 3).Value = WS1.Cells(i, 5).Value 'kontrahent
+                    WS2.Cells(dł_WS2 + licznik, 4).Value = WS1.Cells(i, 6).Value 'MPK
+                    WS2.Cells(dł_WS2 + licznik, 5).Value = WS1.Cells(i, 7).Value 'kwota
+                    WS2.Cells(dł_WS2 + licznik, 7).Value = WS1.Cells(i, 9).Value 'opis
+                    WS2.Cells(dł_WS2 + licznik, 8).Value = WS1.Cells(i, 10).Value 'konto
+                    WS2.Cells(dł_WS2 + licznik, 9).Value = WS1.Cells(i, 11).Value 'kontrahent
+                    WS2.Cells(dł_WS2 + licznik, 10).Value = WS1.Cells(i, 12).Value 'MPK
+                    WS2.Cells(dł_WS2 + licznik, 11).Value = WS1.Cells(i, 13).Value 'kwota
+                    WS2.Cells(dł_WS2 + licznik, 13).Value = WS1.Cells(i, 15).Value 'opis
+                    '---------------------
+    
+                    '--------------------- dane do zakładki CSV_INPUT
+                    WS3.Cells(1, 1).Value = WS2.Cells(5, 16).Value 'lokalizacja pliku
+                    WS3.Cells(1, 3).Value = nazwa_pliku
+                    WS3.Cells(dł_WS3 + licznik, 1).Value = WS2.Cells(dł_WS2 + licznik, 2).Value 'konto
+                    WS3.Cells(dł_WS3 + licznik, 2).Value = WS2.Cells(dł_WS2 + licznik, 3).Value 'kontrahent
+                    WS3.Cells(dł_WS3 + licznik, 3).Value = WS2.Cells(dł_WS2 + licznik, 4).Value 'MPK
+                    WS3.Cells(dł_WS3 + licznik, 4).Value = WS2.Cells(dł_WS2 + licznik, 5).Value 'kwota
+                    WS3.Cells(dł_WS3 + licznik, 6).Value = WS2.Cells(dł_WS2 + licznik, 7).Value 'opis
+                    WS3.Cells(dł_WS3 + licznik, 7).Value = WS2.Cells(dł_WS2 + licznik, 8).Value 'konto
+                    WS3.Cells(dł_WS3 + licznik, 8).Value = WS2.Cells(dł_WS2 + licznik, 9).Value 'kontrahent
+                    WS3.Cells(dł_WS3 + licznik, 9).Value = WS2.Cells(dł_WS2 + licznik, 10).Value 'MPK
+                    WS3.Cells(dł_WS3 + licznik, 10).Value = WS2.Cells(dł_WS2 + licznik, 11).Value 'kwota
+                    WS3.Cells(dł_WS3 + licznik, 12).Value = WS2.Cells(dł_WS2 + licznik, 13).Value 'opis
+                    WS3.Cells(dł_WS3 + licznik, 16).Value = nr_wiersza
+                    '---------------------
+    
+                    licznik = licznik + 1
+    
+                    nr_wiersza = nr_wiersza + 1
+    
+                End If
+    
+            Next
+    
+            Call format
+   
+            If WS2.Cells(18, 18).Value = "STANDARD" Then
+            
+                Call zapis
+    
+            End If
+    
+            If WS2.Cells(18, 18).Value = "ROZDZIELNY" Then
+    
+                Call zapis2
+    
+            End If
+    
+            Sheets("DOKUMENT").Select
+    
+            Range("A1").Select
+           
+        MsgBox "Gotowe"
+    
+    End If
+    
+    Exit Sub
+    
+zakoncz:
+    
+    MsgBox "Coś poszło nie tak - skontaktuj się z twórcą", vbCritical, "ERROR"
+
+End Sub
+Sub czysc()
+
+    Application.ScreenUpdating = False
+
+    ost1 = ThisWorkbook.Worksheets("DOKUMENT").Range("B100000").End(xlUp).Row
+    ost2 = ThisWorkbook.Worksheets("CSV_INPUT").Range("A100000").End(xlUp).Row
+
+    If ost1 = 9 Then ost1 = 10
+
+    Sheets("DOKUMENT").Select
+    Range("A10:M" & ost1).Select
+    Selection.ClearContents
+    Range("A1").Select
+
+    If ost2 = 2 Then ost2 = 3
+
+    Sheets("CSV_INPUT").Select
+    Range("A3:P" & ost2).Select
+    Selection.ClearContents
+    Range("A1").Select
+
+End Sub
+Sub zapis() 'zapis do CSV
+
+        sciezka = WS2.Cells(5, 16).Value
+        nazwa_pliku = WS2.Cells(1, 2).Value & "_" & WS2.Cells(5, 3).Value & "_" & WS2.Cells(6, 3).Value
+
+            Sheets("CSV_INPUT").Select
+            Sheets("CSV_INPUT").Copy
+            ChDir sciezka
+            ActiveWorkbook.SaveAs Filename:=sciezka & nazwa_pliku, _
+                FileFormat:=xlCSV, CreateBackup:=False
+                
+            Range("A1").Select
+
+            ActiveWindow.Close SaveChanges:=True
+
+End Sub
+Sub format() 'poprawa formatowania dla konta
+
+        Sheets("CSV_INPUT").Select
+
+        Columns("A:A").Select
+        Selection.Replace What:="-", Replacement:="", LookAt:=xlPart, _
+            SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False
+
+        Columns("G:G").Select
+
+        Selection.Replace What:="-", Replacement:="", LookAt:=xlPart, _
+            SearchOrder:=xlByRows, MatchCase:=False, SearchFormat:=False, _
+            ReplaceFormat:=False
+
+        Range("A1").Select
+
+End Sub
+Sub zapis2() 'zapis CSV z podziałem na kolumny
+
+        sciezka = WS2.Cells(5, 16).Value
+
+        nazwa_pliku = WS2.Cells(1, 2).Value & "_" & WS2.Cells(5, 3).Value & "_" & WS2.Cells(6, 3).Value
+
+            plik = sciezka & nazwa_pliku
+
+            ActiveSheet.Copy
+            ActiveWorkbook.SaveAs Filename:=plik, FileFormat:=xlCSV, Local:=True
+            ActiveWorkbook.Close False
+
+
+End Sub
+Sub tworz_mape() 'tworzy mape bezpośrednio na podstawie danych wsadowych
+
+    Application.ScreenUpdating = False
+
+    Sheets("MAPA").Select
+    Range("G:G").Select
+    Selection.ClearContents
+
+    '---------- sprawdza czy jest założony filtr w arkuszu a jeżeli jest to go czyści
+
+    If Sheets("PLANET").AutoFilterMode = True Then
+        On Error Resume Next
+        Sheets("PLANET").ShowAllData
+        On Error GoTo 0
+    End If
+    '----------
+
+    ost3 = ThisWorkbook.Worksheets("PLANET").Range("B100000").End(xlUp).Row
+
+    Sheets("PLANET").Select
+    Range("B9:B" & ost3).Select
+    Selection.Copy
+
+    Sheets("MAPA").Select
+    Range("G1").Select
+
+    Selection.PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks _
+        :=False, Transpose:=False
+    Application.CutCopyMode = False
+    ActiveSheet.Range("$G$1:$G$346").RemoveDuplicates Columns:=1, Header:=xlYes
+    Range("G1").Select
+
+End Sub
+
